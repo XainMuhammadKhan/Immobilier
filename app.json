@@ -8,7 +8,8 @@
     "scheme": "immobilier",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.xain.k19.immobilier"
     },
     "android": {
       
