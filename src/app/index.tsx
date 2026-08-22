@@ -1,17 +1,23 @@
-import { Text, View, StyleSheet } from "react-native";
+import { useAuth } from "@clerk/expo";
+import { Redirect } from "expo-router";
 
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text>Edit src/app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+  const {isSignedIn,isLoaded} = useAuth()
+
+  if (!isLoaded) return null;
+  if (isSignedIn) {return <Redirect href = "/(root)/(tabs)"/>}
+  console.log("INDEX", {
+  isLoaded,
+  isSignedIn,
+});
+  return <Redirect href="/(auth)/sign-up" />;
+
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+
+
+// "adaptiveIcon": {
+//         "backgroundColor": "#E6F4FE",
+//         "foregroundImage": "./assets/images/applogo.png",
+//         "monochromeImage": "./assets/images/applogo.png"
+//       }, this all goes in app.json file for adaptive icon if something goes wrong with the icon in android device with current icon. This is optional and can be removed if not needed.

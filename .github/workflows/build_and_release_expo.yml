@@ -1,0 +1,57 @@
+name: "Build & Release"
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Log in to Expo
+        run: eas whoami || eas login --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.CICD_TOKEN }}
+
+      - name: Build Android APK (local)
+        run: eas build --platform android --profile preview --local --output build/app-release.apk --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.CICD_TOKEN }}
+
+      - name: Build iOS simulator build (local, no signing needed)
+        run: eas build --platform ios --profile preview --local --output build/app-simulator.tar.gz --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.CICD_TOKEN }}
+
+      # Only create a GitHub Release on actual pushes to main/master/develop,
+      # not on pull requests — PRs just need the build to succeed as a check.
+      - name: Push to Releases
+        if: github.event_name == 'push'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app-release.apk,build/app-simulator.tar.gz"
+          tag: v1.0.${{ github.run_number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
